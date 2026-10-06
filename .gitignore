@@ -1,0 +1,8 @@
+.DS_Store
+node_modules/
+.env
+.env.*
+!.env.example
+*.log
+# Tài liệu hướng dẫn đọc code cũ không thuộc bộ demo phát hành.
+docs/STEP_BY_STEP_VI.md
