@@ -2,8 +2,6 @@
 
 Web demo: khám phá 200 khách hàng, khảo sát K, chạy từng phase của K-Means và alternating K-Medoids, so sánh khi có outliers.
 
-**Tài liệu để thuyết trình:** [Kịch bản demo từng bước](docs/DEMO_STEP_BY_STEP_VI.md) — 4 màn hình, 10 bước trình bày, thao tác cụ thể, lời nói gợi ý và số liệu đối chiếu.
-
 ## Chạy demo
 
 Cần Python 3; mở terminal tại thư mục repo:
