@@ -1,16 +1,3 @@
-# Kịch bản demo Partitioning Methods Lab
-
-Tài liệu này dùng để mở bên cạnh web khi thuyết trình, không phải hướng dẫn đọc code. Web có **4 màn hình chính** và buổi demo dưới đây có **10 bước**, khoảng **12–15 phút**. Số lần bấm Next Step là các phase của thuật toán, không phải số màn hình hay số iteration.
-
-## Chuẩn bị trước buổi demo
-
-1. Chạy `python3 -m http.server 5500 --bind 127.0.0.1` tại thư mục repo; mở http://127.0.0.1:5500.
-2. Reload trang để trở về trạng thái đầu. Giữ X = **Annual Income (k$)**, Y = **Spending Score**, K = **5**.
-3. Ở Clustering Lab chọn **K-Means**, nhấn **Reset**. Ở Compare Methods để **Inject 3 Outliers** tắt, rồi quay về Explore Data.
-4. Mở tài liệu này ở cửa sổ bên cạnh. Khi demo xong, Ctrl+C tại terminal để dừng server.
-
-Không cần Internet khi chạy demo; chỉ link Kaggle cần mạng. Các số bên dưới được kiểm tra bằng engine hiện tại với cấu hình mặc định, làm tròn hai chữ số thập phân.
-
 ## Lộ trình
 
 | Bước | Màn hình | Nội dung | Thời gian |
@@ -175,7 +162,7 @@ Có thể mô tả khu vực thu nhập cao/chi tiêu cao bằng tọa độ, nh
 
 **Lời kết:** “Qua demo, quy trình là hiểu dataset, khảo sát K, khởi tạo representative, gán điểm, cập nhật representative và lặp đến hội tụ. Khác biệt chính là K-Means dùng mean còn K-Medoids dùng observation đại diện. Kết quả phụ thuộc features, scale, K và khởi tạo; hội tụ chưa đồng nghĩa phân cụm tối ưu cho bài toán kinh doanh.”
 
-## Câu hỏi thường gặp khi bảo vệ
+## Câu hỏi
 
 - **Tại sao K=5?** Là cấu hình minh họa cố định của demo. Elbow hiện tại chưa đủ để khẳng định 5 tối ưu; cần khảo sát thêm.
 - **Có chuẩn hóa chưa?** Chưa, web dùng raw features và ghi rõ trên toolbar. Scale khác nhau ảnh hưởng distance.
@@ -185,11 +172,3 @@ Có thể mô tả khu vực thu nhập cao/chi tiêu cao bằng tọa độ, nh
 - **Tại sao chạy lại giống nhau?** Initialization deterministic, dữ liệu và thứ tự cố định.
 - **Có bảo đảm tối ưu toàn cục?** Không. Đây là kết quả hội tụ với khởi tạo hiện tại.
 - **Nếu một cụm rỗng?** Implementation giữ representative cũ. Engine có giới hạn 200 iterations; trạng thái Limit reached không được gọi là Converged.
-
-## Xử lý nhanh khi đang trình bày
-
-- Muốn làm lại: chọn đúng features/K/algorithm rồi **Reset**. Reset chỉ đưa Lab về Original, không tự khôi phục các dropdown hay tắt outliers.
-- Muốn dừng để nói: **Pause**; chuyển tab cũng dừng Auto Run.
-- Không thấy điểm sau khi mở file trực tiếp: dùng HTTP server theo phần chuẩn bị, không double-click HTML.
-- Port 5500 đang bận: dùng `python3 -m http.server 5501 --bind 127.0.0.1`, mở http://127.0.0.1:5501. Không dừng process không rõ nguồn gốc.
-- Số liệu khác tài liệu: kiểm tra X=Income, Y=Spending Score, K=5, trạng thái checkbox, và chờ Converged.
