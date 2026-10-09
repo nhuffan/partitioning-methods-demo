@@ -60,7 +60,7 @@
 
 **Nói rõ:** “Đường cong này chưa cho một elbow duy nhất rõ ràng; từ K=5 sang K=6 vẫn giảm mạnh. Em giữ K=5 để minh họa các phase, không khẳng định K=5 là tối ưu. Khởi tạo cố định giúp lặp lại kết quả, nhưng có thể dẫn đến nghiệm local. Nếu cần chọn K cho ứng dụng thực, cần khảo sát thêm khởi tạo, chuẩn hóa và tiêu chí đánh giá.”
 
-**Lưu ý thao tác:** Calculate Elbow không tự đổi dropdown K. Dropdown chạy Lab/Compare có K=2…6; đường Elbow khảo sát K=1…8.
+**Lưu ý thao tác:** Calculate Elbow không tự đổi dropdown K. Dropdown K chỉ hiển thị ở Lab/Compare, mặc định 5 và dùng chung giá trị giữa hai tab; có K=2…6; đường Elbow khảo sát K=1…8.
 
 ## Bước 4 — K-Means: dữ liệu gốc và khởi tạo
 
@@ -122,7 +122,7 @@ Centroid cuối để đối chiếu: (47.96, 43.25), (108.18, 82.73), (87.00, 1
 
 ## Bước 8 — So sánh hai phương pháp trên dữ liệu gốc
 
-**Thao tác:** Chuyển **04 Compare Methods**, chắc chắn **Inject 3 Outliers** tắt → bấm **Run Comparison**.
+**Thao tác:** Chuyển **04 Compare Methods**, chắc chắn **Inject 3 Outliers** tắt. Kết quả được tính tự động khi đổi K, features hoặc bật/tắt outliers.
 
 **Nói:** “Hai bên cùng 200 khách hàng, cùng hai features, K=5 và Euclidean distance. Bên trái là centroid trung bình; bên phải là medoid lấy từ observation. Em quan sát vị trí representative và cách phân nhóm.”
 
