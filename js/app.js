@@ -16,7 +16,7 @@ function renderLab(){
  $('labTitle').textContent=`${means?'K-Means':'PAM (K-Medoids)'} · Step-by-step`;
  $('iterationLabel').textContent=means?'Iteration':'Accepted swaps';
  $('status').textContent=s.status;$('iteration').textContent=s.iteration;
- $('objectiveLabel').textContent=means?'SSE (WCSS)':'Total Dissimilarity';$('objective').textContent=fmt(s.objective);
+ $('objectiveLabel').textContent=means?'SSE':'Total Dissimilarity';$('objective').textContent=fmt(s.objective);
  $('representative').textContent=means?'Centroid':'Medoid';
  const explanations={original:'Dữ liệu chưa có cluster label. Nhấn Next Step để Initialize.',initialize:`Đã chọn ${appState.k} representatives bằng deterministic farthest-first. Chưa Assignment nên các customer vẫn cùng màu.`,assignment:'Assignment: gán mỗi observation vào representative gần nhất theo Euclidean distance. Representative giữ nguyên ở bước này.',update:means?'Update: tính mean của các observations trong từng cluster để di chuyển centroid. Giữ nguyên labels; lần Next Step tiếp theo mới Assignment lại.':'Update: chọn observation có tổng distance nhỏ nhất trong từng cluster làm medoid. Giữ nguyên labels ở phase này.',converged:'Converged: representatives đã ổn định sau Update. Dừng thuật toán; đây là nghiệm local, không bảo đảm global optimum.'};
  if(!means){
@@ -50,13 +50,13 @@ function renderComparison(){
  $('compareContext').textContent=`Cùng ${result.data.length} observations · K = ${appState.k}`;
  for(const [name,chart,metric] of [['kmeans','kmChart','kmMetrics'],['kmedoids','medChart','medMetrics']]){
   const s=result[name];scatter($(chart),result.data,{...chartOptions(),...s,algorithm:name});
-  $(metric).innerHTML=`<div class="metric"><span>${name==='kmeans'?'Iterations':'Accepted swaps'} / Status</span><b>${s.iteration} / ${s.status}</b></div><div class="metric"><span>${name==='kmeans'?'SSE (WCSS)':'Total Dissimilarity'}</span><b>${fmt(s.objective)}</b></div>`+(name==='kmedoids'?`<div class="metric"><span>Evaluation rounds / Pairs tested</span><b>${s.evaluationRounds} / ${s.evaluatedSwaps}</b></div><div class="metric"><span>Final best ΔE (not accepted)</span><b>${s.swap?s.swap.delta.toFixed(6):'—'}</b></div>`:'');
+  $(metric).innerHTML=`<div class="metric"><span>${name==='kmeans'?'Iterations':'Accepted swaps'} / Status</span><b>${s.iteration} / ${s.status}</b></div><div class="metric"><span>${name==='kmeans'?'SSE':'Total Dissimilarity'}</span><b>${fmt(s.objective)}</b></div>`+(name==='kmedoids'?`<div class="metric"><span>Evaluation rounds / Pairs tested</span><b>${s.evaluationRounds} / ${s.evaluatedSwaps}</b></div><div class="metric"><span>Final best ΔE (not accepted)</span><b>${s.swap?s.swap.delta.toFixed(6):'—'}</b></div>`:'');
  }
  $('experimentNote').textContent=out?'Experiment: thêm 3 synthetic outliers (×) vào bản sao dataset; cả hai phương pháp chạy lại cùng input, K và initialization rule. Outliers có thể thay đổi cả initialization lẫn kết quả. Quan sát tác động, không mặc định K-Medoids luôn bất biến.':'Baseline: 200 customers gốc, cùng feature pair, K và Euclidean distance. Bật Inject 3 Outliers để chạy lại; tắt để quay về baseline.';
 }
 function refreshFeatures(){
  scatter($('exploreChart'),points(),chartOptions());resetLab();renderComparison();
- $('elbowChart').classList.add('empty');$('elbowChart').textContent='Chọn Calculate Elbow để tính SSE (WCSS) cho feature pair hiện tại.';$('elbowValues').replaceChildren();
+ $('elbowChart').classList.add('empty');$('elbowChart').textContent='Chọn Calculate Elbow để tính SSE cho feature pair hiện tại.';$('elbowValues').replaceChildren();
 }
 for(const axis of ['X','Y'])$('feature'+axis).addEventListener('change',()=>{
  const other=axis==='X'?'Y':'X';
@@ -74,7 +74,7 @@ for(const b of document.querySelectorAll('.tab'))b.addEventListener('click',()=>
 $('calculate').addEventListener('click',()=>{
  const values=Array.from({length:8},(_,i)=>run(points(),i+1,'kmeans').objective);
  $('elbowChart').classList.remove('empty');elbow($('elbowChart'),values);
- $('elbowValues').innerHTML='<table><thead><tr><th>K</th><th>SSE (WCSS)</th></tr></thead><tbody>'+values.map((v,i)=>`<tr><td>${i+1}</td><td>${fmt(v)}</td></tr>`).join('')+'</tbody></table>';
+ $('elbowValues').innerHTML='<table><thead><tr><th>K</th><th>SSE</th></tr></thead><tbody>'+values.map((v,i)=>`<tr><td>${i+1}</td><td>${fmt(v)}</td></tr>`).join('')+'</tbody></table>';
 });
 $('outliers').addEventListener('change',renderComparison);
 $('sampleRows').innerHTML=customers.slice(0,5).map(r=>`<tr><td>${r.id}</td><td>${r.gender}</td><td>${r.age}</td><td>${r.income}</td><td>${r.spending}</td></tr>`).join('');
