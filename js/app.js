@@ -13,14 +13,33 @@ function pause(){clearInterval(appState.timer);appState.timer=null;$('auto').tex
 function renderLab(){
  const s=appState.lab,means=appState.algorithm==='kmeans';
  scatter($('labChart'),points(),{...chartOptions(),...s,algorithm:appState.algorithm});
- $('labTitle').textContent=`${means?'K-Means':'K-Medoids'} · Step-by-step`;
+ $('labTitle').textContent=`${means?'K-Means':'PAM (K-Medoids)'} · Step-by-step`;
+ $('iterationLabel').textContent=means?'Iteration':'Accepted swaps';
  $('status').textContent=s.status;$('iteration').textContent=s.iteration;
  $('objectiveLabel').textContent=means?'WCSS':'Total Dissimilarity';$('objective').textContent=fmt(s.objective);
  $('representative').textContent=means?'Centroid':'Medoid';
  const explanations={original:'Dữ liệu chưa có cluster label. Nhấn Next Step để Initialize.',initialize:`Đã chọn ${appState.k} representatives bằng deterministic farthest-first. Chưa Assignment nên các customer vẫn cùng màu.`,assignment:'Assignment: gán mỗi observation vào representative gần nhất theo Euclidean distance. Representative giữ nguyên ở bước này.',update:means?'Update: tính mean của các observations trong từng cluster để di chuyển centroid. Giữ nguyên labels; lần Next Step tiếp theo mới Assignment lại.':'Update: chọn observation có tổng distance nhỏ nhất trong từng cluster làm medoid. Giữ nguyên labels ở phase này.',converged:'Converged: representatives đã ổn định sau Update. Dừng thuật toán; đây là nghiệm local, không bảo đảm global optimum.'};
+ if(!means){
+  explanations['swap-evaluation']='Swap Evaluation: thử mọi cặp medoid–non-medoid trên toàn dataset. ΔE = E_mới − E_hiện tại sau khi gán lại vào medoid gần nhất. Chưa thay đổi medoids hay labels.';
+  explanations['best-swap']=s.stable?'Best Swap: không có ΔE < −1e−9; không nhận hoán đổi. Next Step xác nhận Converged.':'Best Swap: nhận đúng một cặp có ΔE nhỏ nhất (< −1e−9), thay medoid và gán lại labels để hiển thị đúng E_mới. Next Step trở về Assignment.';
+  explanations.converged='Converged: không còn hoán đổi một medoid với một non-medoid làm giảm E (sai số 1e−9). Đây là nghiệm tối ưu cục bộ theo một swap, không bảo đảm tối ưu toàn cục.';
+ }
  $('explanation').textContent=explanations[s.phase]+(s.phase==='update'&&s.stable?' Representatives đã ổn định; Next Step sẽ xác nhận Converged.':'');
- $('movementHint').hidden=s.phase!=='update'||!s.reps.some((r,i)=>representativeMoved(r,s.previous[i]));
- $('phases').innerHTML=['original','initialize','assignment','update','converged'].map(p=>`<span class="${s.phase===p?'current':''}">${p}</span>`).join('');
+ $('movementHint').hidden=!(means?s.phase==='update':s.phase==='best-swap')||!s.reps.some((r,i)=>representativeMoved(r,s.previous[i]));
+ $('movementHint').textContent=means?'Mũi tên nét đứt cho thấy centroid di chuyển ở bước Update. ':'Mũi tên nét đứt cho thấy medoid cũ → medoid mới ở bước Best Swap. ';
+ const phases=means?['original','initialize','assignment','update','converged']:['original','initialize','assignment','swap-evaluation','best-swap','converged'];
+ $('phases').innerHTML=phases.map(p=>`<span class="${s.phase===p?'current':''}">${p.replaceAll('-',' ').replace(/\b\w/g,c=>c.toUpperCase())}</span>`).join('');
+ $('pamDetails').hidden=means;
+ if(!means){
+  const e=s.evaluation,best=e?.best;
+  $('pamDetails').innerHTML=`<div class="metric"><span>Evaluation rounds / Pairs tested</span><b>${s.evaluationRounds??0} / ${s.evaluatedSwaps??0}</b></div>`;
+  if(e){
+   $('pamDetails').innerHTML+=`<p>${e.count} cặp trong vòng này · ΔE = E_mới − E_cũ</p>`;
+   if(best)$('pamDetails').innerHTML+=`<div class="note">${s.phase==='swap-evaluation'?'Đề xuất':s.stable?'Không nhận':'Đã nhận'}: ID ${best.outgoing.id} → ID ${best.incoming.id}<br>E: ${fmt(best.before)} → ${fmt(best.after)}<br><b>ΔE = ${best.delta.toFixed(6)}</b></div><details><summary>5 cặp có ΔE nhỏ nhất</summary><table><thead><tr><th>Ra → vào</th><th>ΔE</th></tr></thead><tbody>${e.swaps.slice(0,5).map(v=>`<tr><td>${v.outgoing.id} → ${v.incoming.id}</td><td>${v.delta.toFixed(6)}</td></tr>`).join('')}</tbody></table></details>`;
+   else $('pamDetails').innerHTML+='<p>Không có non-medoid để hoán đổi.</p>';
+  }
+ }
+
  const done=['Converged','Limit reached'].includes(s.status);$('next').disabled=done;$('auto').disabled=done;
  $('representativeList').innerHTML=s.reps.map((r,i)=>`<div class="metric"><span>Cluster ${i+1}${means?'':` · ID ${r.id}`}</span><b>(${fmt(r.x)}, ${fmt(r.y)})</b></div>`).join('');
 }
@@ -31,7 +50,7 @@ function renderComparison(){
  $('compareContext').textContent=`Cùng ${result.data.length} observations · K = ${appState.k}`;
  for(const [name,chart,metric] of [['kmeans','kmChart','kmMetrics'],['kmedoids','medChart','medMetrics']]){
   const s=result[name];scatter($(chart),result.data,{...chartOptions(),...s,algorithm:name});
-  $(metric).innerHTML=`<div class="metric"><span>Iterations / Status</span><b>${s.iteration} / ${s.status}</b></div><div class="metric"><span>${name==='kmeans'?'WCSS':'Total Dissimilarity'}</span><b>${fmt(s.objective)}</b></div>`;
+  $(metric).innerHTML=`<div class="metric"><span>${name==='kmeans'?'Iterations':'Accepted swaps'} / Status</span><b>${s.iteration} / ${s.status}</b></div><div class="metric"><span>${name==='kmeans'?'WCSS':'Total Dissimilarity'}</span><b>${fmt(s.objective)}</b></div>`+(name==='kmedoids'?`<div class="metric"><span>Evaluation rounds / Pairs tested</span><b>${s.evaluationRounds} / ${s.evaluatedSwaps}</b></div><div class="metric"><span>Final best ΔE (not accepted)</span><b>${s.swap?s.swap.delta.toFixed(6):'—'}</b></div>`:'');
  }
  $('experimentNote').textContent=out?'Experiment: thêm 3 synthetic outliers (×) vào bản sao dataset; cả hai phương pháp chạy lại cùng input, K và initialization rule. Outliers có thể thay đổi cả initialization lẫn kết quả. Quan sát tác động, không mặc định K-Medoids luôn bất biến.':'Baseline: 200 customers gốc, cùng feature pair, K và Euclidean distance. Bật Inject 3 Outliers để chạy lại; tắt để quay về baseline.';
 }
@@ -49,7 +68,7 @@ $('k').addEventListener('change',()=>{appState.k=Number($('k').value);resetLab()
 $('algorithm').addEventListener('change',()=>{appState.algorithm=$('algorithm').value;resetLab();});
 $('reset').addEventListener('click',resetLab);
 $('next').addEventListener('click',()=>{pause();step();});
-$('auto').addEventListener('click',()=>{if(appState.timer){pause();return;}step();if(appState.lab.status==='Converged')return;appState.timer=setInterval(step,800);$('auto').textContent='Pause';});
+$('auto').addEventListener('click',()=>{if(appState.timer){pause();return;}step();if(['Converged','Limit reached'].includes(appState.lab.status))return;appState.timer=setInterval(step,800);$('auto').textContent='Pause';});
 // Auto Run gọi đúng cùng step(), không chạy một phiên bản thuật toán khác.
 for(const b of document.querySelectorAll('.tab'))b.addEventListener('click',()=>{pause();appState.activeTab=b.dataset.tab;$('kControl').hidden=!['lab','compare'].includes(appState.activeTab);for(const page of document.querySelectorAll('.page'))page.hidden=page.id!==appState.activeTab;for(const tab of document.querySelectorAll('.tab')){const active=tab===b;tab.classList.toggle('active',active);if(active)tab.setAttribute('aria-current','page');else tab.removeAttribute('aria-current');}});
 $('calculate').addEventListener('click',()=>{

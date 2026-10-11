@@ -6,7 +6,7 @@ import {pointsFrom,assign,objective} from '../js/utils.js';
 import {createState,nextStep,run} from '../js/engine.js';
 import {compare} from '../js/compare.js';
 import {updateCentroids} from '../js/kmeans.js';
-import {updateMedoids} from '../js/kmedoids.js';
+import {evaluateSwaps,applySwap} from '../js/kmedoids.js';
 test('200 records khớp toàn bộ CSV Kaggle',()=>{
  const rows=readFileSync(new URL('../assets/Mall_Customers.csv',import.meta.url),'utf8').trim().split(/\r?\n/).slice(1);
  assert.equal(rows.length,200);assert.equal(new Set(customers.map(r=>r.id)).size,200);
@@ -27,7 +27,7 @@ for(const name of ['kmeans','kmedoids'])test(`${name}: phase riêng, objective k
 test('Update trên dữ liệu nhỏ có đáp án biết trước; cluster rỗng',()=>{
  const p=[{id:1,x:0,y:0},{id:2,x:2,y:0},{id:3,x:10,y:0}],reps=[p[0],{id:4,x:99,y:99}];
  assert.equal(updateCentroids(p,[0,0,0],reps)[0].x,4);
- assert.equal(updateMedoids(p,[0,0,0],reps)[0].id,2);
+
  assert.deepEqual(updateCentroids(p,[0,0,0],reps)[1],reps[1]);
 });
 test('Outlier comparison không mutate dataset; bật/tắt phục hồi baseline',()=>{

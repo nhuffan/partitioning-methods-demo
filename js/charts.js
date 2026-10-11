@@ -11,7 +11,7 @@ export function scatterDomain(values,feature){
  const step=magnitude/5;
  return [0,Math.ceil(padded/step)*step];
 }
-export function scatter(el,points,{labels=[],reps=[],previous=[],algorithm='kmeans',xLabel,yLabel,xFeature,yFeature}={}){
+export function scatter(el,points,{labels=[],reps=[],previous=[],algorithm='kmeans',xLabel,yLabel,xFeature,yFeature,phase,evaluation}={}){
  const W=720,H=440,L=66,R=24,T=28,B=65,all=[...points,...reps,...previous];
  const [xmin,xmax]=scatterDomain(all.map(p=>p.x),xFeature),[ymin,ymax]=scatterDomain(all.map(p=>p.y),yFeature);
  const sx=x=>L+(x-xmin)/(xmax-xmin)*(W-L-R),sy=y=>H-B-(y-ymin)/(ymax-ymin)*(H-T-B);
@@ -21,6 +21,12 @@ export function scatter(el,points,{labels=[],reps=[],previous=[],algorithm='kmea
  points.forEach((p,i)=>{const c=labels.length?colors[labels[i]]:'#8390a6';const title=`${p.synthetic?'Synthetic outlier':'Customer'} ${p.id} | ${xLabel}: ${p.x} | ${yLabel}: ${p.y}${labels.length?' | Cluster '+(labels[i]+1):''}`;z+=p.synthetic?`<g class="outlier" stroke="${c}" stroke-width="3"><title>${title}</title><path d="M${sx(p.x)-6},${sy(p.y)-6} l12,12 m0,-12 l-12,12"/></g>`:`<circle class="customer" cx="${sx(p.x)}" cy="${sy(p.y)}" r="4.5" fill="${c}" opacity=".85"><title>${title}</title></circle>`;});
  reps.forEach((p,i)=>{const old=previous[i];if(representativeMoved(p,old))z+=`<line x1="${sx(old.x)}" y1="${sy(old.y)}" x2="${sx(p.x)}" y2="${sy(p.y)}" stroke="#18243d" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#arrow-${el.id})"/>`;
  z+=`<g class="representative"><title>${algorithm==='kmeans'?'Centroid':'Medoid customer '+p.id} · Cluster ${i+1} · (${p.x.toFixed(2)}, ${p.y.toFixed(2)})</title>`+text(sx(p.x),sy(p.y)+8,algorithm==='kmeans'?'★':'◆',`text-anchor="middle" style="font-size:27px;fill:${colors[i]};stroke:white;stroke-width:2.5;paint-order:stroke"`)+text(sx(p.x)+12,sy(p.y)-10,i+1,'style="font-weight:700;fill:#172033"')+'</g>';});
+ if(phase==='swap-evaluation'&&evaluation?.best){
+  const {outgoing,incoming,delta}=evaluation.best;
+  for(const [point,label,color] of [[outgoing,'OUT','#dc4266'],[incoming,'IN','#00866b']]){
+   z+=`<circle class="swap-candidate" cx="${sx(point.x)}" cy="${sy(point.y)}" r="12" fill="none" stroke="${color}" stroke-width="3"><title>${label}: ID ${point.id}; proposed ΔE=${delta.toFixed(6)}</title></circle>`+text(sx(point.x)+14,sy(point.y)+18,label,`style="fill:${color};font-weight:700"`);
+  }
+ }
  el.innerHTML=z+'</svg><div class="legend">● Customer &nbsp; ★ Centroid &nbsp; ◆ Medoid &nbsp; × Synthetic outlier'+(labels.length?'<br>'+reps.map((_,i)=>`<span style="color:${colors[i]}">● Cluster ${i+1}</span>`).join(' &nbsp; '):'')+'</div>';
 }
 export function elbow(el,values){

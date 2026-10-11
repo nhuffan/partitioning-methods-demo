@@ -104,21 +104,40 @@
 
 Centroid cuối để đối chiếu: (47.96, 43.25), (108.18, 82.73), (87.00, 18.63), (77.72, 81.07), (25.73, 79.36).
 
-## Bước 7 — K-Medoids: đổi cách chọn representative
+## Bước 7 — PAM: đánh giá và nhận best swap
 
-**Thao tác:** Đổi Algorithm sang **K-Medoids**; Lab tự reset. Bấm Next Step lần lượt 1, 2, 3 để xem Initialize → Assignment → Update, sau đó Auto Run đến Converged.
+**Chuẩn bị:** X=Annual Income, Y=Spending Score, K=5. Đổi Algorithm sang **PAM (K-Medoids)**; Lab tự reset. Phase Original chưa có nhãn. Mỗi Next Step tiến đúng một phase; Auto Run gọi cùng Next Step mỗi khoảng 0.8 giây, Pause dừng tại phase hiện tại.
 
-**Nói tại Initialize:** “K-Medoids cũng bắt đầu với năm representative. Marker hình thoi ◆ là medoid và luôn là một observation thuộc input; bên cạnh có customer ID. Với cùng cấu hình gốc, hai thuật toán dùng cùng các điểm khởi tạo.”
+**Lần 1 — Initialize:** Năm medoids ◆ có IDs 21, 200, 193, 124, 8, giống khởi tạo K-Means. Nói: “Theo yêu cầu demo, em giữ Farthest-First thay cho bước BUILD cổ điển của PAM. Phần tối ưu phía sau thực hiện PAM SWAP trên toàn bộ dataset.”
 
-**Nói tại Assignment:** “Cũng gán mỗi điểm vào representative gần nhất theo Euclidean distance.”
+**Lần 2 — Assignment:** Gán mỗi điểm cho medoid gần nhất. E = **5,349.30**. Nói: “E là tổng khoảng cách Euclidean, không bình phương. Đây là chi phí của toàn bộ 200 khách hàng.”
 
-**Nói tại Update:** “Thay vì lấy trung bình, thuật toán thử các observation trong từng cụm. Với mỗi ứng viên, cộng khoảng cách từ ứng viên đó đến mọi điểm trong cụm; chọn ứng viên có tổng nhỏ nhất làm medoid mới. Labels vẫn giữ nguyên cho đến Assignment tiếp theo.”
+**Lần 3 — Swap Evaluation:** Xét **5 × (200−5) = 975 cặp**: mỗi medoid đang chọn với mọi observation chưa là medoid, kể cả khác cụm. Với từng cặp, giả sử thay medoid, gán lại mọi điểm cho medoid gần nhất rồi tính E_mới. **ΔE = E_mới − E_cũ**; số âm là cải thiện. Giao diện giữ nguyên medoids, labels, E hiện tại; vòng OUT/IN đánh dấu cặp đề xuất, bảng mở rộng hiển thị 5 cặp có ΔE nhỏ nhất, không phải chỉ thử 5 cặp.
 
-**Ví dụ tính tay nếu cần:** Với ba điểm (0,0), (2,0), (10,0), tổng khoảng cách của từng ứng viên là 12, 10, 18. Medoid là (2,0), còn mean là (4,0). Ví dụ này chỉ minh họa quy tắc, không phải cụm thật trên web.
+Nói: “Cặp tốt nhất vòng đầu là ID **200 → 78**, ΔE = **−1,814.556624**, chi phí dự kiến **3,534.74**. Đây mới là đánh giá giả định, chưa áp dụng.”
 
-**Đối chiếu:** Assignment đầu: Total Dissimilarity **5,349.30**. Update đầu: **3,272.38**. Khi hội tụ: **4 iterations**, Total Dissimilarity **3,036.05**; medoid IDs **78, 190, 167, 162, 16**. Nếu bấm tay từ Original: **10 lần Next Step**.
+**Lần 4 — Best Swap:** Nhận đúng một cặp có ΔE nhỏ nhất nếu ΔE < −1e−9. Medoid 200 được thay bằng 78; mũi tên nét đứt thể hiện hoán đổi thực tế. Accepted swaps tăng lên 1, E = **3,534.74**. Labels được gán lại ngay tại phase này để màu và E khớp với medoids mới; không giữ labels cũ như Update của K-Means.
 
-**Nói:** “Web triển khai alternating K-Medoids: luân phiên gán cụm và chọn medoid trong cụm, không phải thuật toán PAM với bước tìm hoán đổi toàn cục. Hội tụ khi các medoid không còn thay đổi.”
+**Lần 5 — Assignment:** Hiển thị lại phép gán gần nhất của cấu hình vừa nhận rồi tiếp tục Swap Evaluation → Best Swap. Khi không có cặp cải thiện, Best Swap ghi **Không nhận**, giữ nguyên medoids/E, không có mũi tên. Next Step sau đó chuyển Converged. Khi không có non-medoid (K=N), không có cặp để xét và thuật toán cũng dừng.
+
+**Nói khi hội tụ:** “PAM dừng vì không còn một hoán đổi medoid–non-medoid nào giảm tổng chi phí trong sai số 1e−9. Đây là tối ưu cục bộ theo một swap, không bảo đảm tối ưu toàn cục.”
+
+**Kết quả mặc định:** **8 accepted swaps**, **9 evaluation rounds**, **8,775 pairs tested**, E = **2,619.35**; medoid IDs **25, 81, 167, 162, 16**. Best ΔE cuối = **+0.222297**, không được nhận. Từ Original cần **29 lần Next Step** để đến Converged; số lần bấm không bằng số swaps.
+
+| Swap đã nhận | ID ra → vào | ΔE | E sau swap |
+|---|---|---:|---:|
+| 1 | 200 → 78 | −1,814.556624 | 3,534.74 |
+| 2 | 193 → 177 | −448.383949 | 3,086.36 |
+| 3 | 124 → 162 | −249.320312 | 2,837.04 |
+| 4 | 8 → 26 | −129.948145 | 2,707.09 |
+| 5 | 21 → 25 | −82.920375 | 2,624.17 |
+| 6 | 78 → 81 | −2.193563 | 2,621.97 |
+| 7 | 26 → 16 | −2.101275 | 2,619.87 |
+| 8 | 177 → 167 | −0.524736 | 2,619.35 |
+
+**Ví dụ tính tay:** Với K=1 và các điểm (0,0), (2,0), (10,0), medoid ban đầu (0,0) có E=12. Đổi sang (2,0) cho E=10, ΔE=−2; đổi sang (10,0) cho E=18, ΔE=+6. PAM nhận (2,0), rồi kiểm tra lại mọi swap trước khi dừng. Đây là ví dụ riêng, không phải dữ liệu trên biểu đồ.
+
+Tham khảo: [R cluster::pam — SWAP và local minimum](https://search.r-project.org/CRAN/refmans/cluster/html/pam.html). Giữ Farthest-First nghĩa là demo không dùng BUILD cổ điển; không gọi việc chọn medoid tốt nhất trong từng cụm là PAM.
 
 ## Bước 8 — So sánh hai phương pháp trên dữ liệu gốc
 
@@ -129,12 +148,12 @@ Centroid cuối để đối chiếu: (47.96, 43.25), (108.18, 82.73), (87.00, 1
 | Điều quan sát | K-Means | K-Medoids |
 |---|---|---|
 | Representative | ★ centroid, có thể không trùng điểm thật | ◆ medoid, thuộc input |
-| Cập nhật | Trung bình tọa độ | Observation có tổng khoảng cách nhỏ nhất trong cụm |
+| Cập nhật | Trung bình tọa độ | Best swap trên mọi cặp medoid–non-medoid |
 | Objective | WCSS, tổng bình phương khoảng cách | Total Dissimilarity, tổng khoảng cách |
-| Iterations mặc định | 6 | 4 |
-| Objective mặc định | 66,674.36 | 3,036.05 |
+| Số bước tối ưu mặc định | 6 iterations | 8 accepted swaps; 9 evaluation rounds |
+| Objective mặc định | 66,674.36 | 2,619.35 |
 
-**Nói rõ:** “Không lấy 3,036 nhỏ hơn 66,674 để kết luận K-Medoids tốt hơn vì hai mục tiêu khác nhau. Bốn iteration cũng chưa chứng minh nhanh hơn sáu iteration vì chi phí mỗi vòng khác nhau. Màu cụm giữa hai biểu đồ không bảo đảm cùng một nhóm khách hàng.”
+**Nói rõ:** “Không lấy 2,619 nhỏ hơn 66,674 để kết luận K-Medoids tốt hơn vì hai mục tiêu khác nhau. Accepted swaps của PAM và iterations của K-Means không phải cùng đơn vị công việc; không dùng số này để kết luận phương pháp nào nhanh hơn. Màu cụm giữa hai biểu đồ không bảo đảm cùng một nhóm khách hàng.”
 
 Có thể mô tả khu vực thu nhập cao/chi tiêu cao bằng tọa độ, nhưng đó là diễn giải sau phân cụm, không phải nhãn đã được dataset xác nhận.
 
@@ -146,7 +165,7 @@ Có thể mô tả khu vực thu nhập cao/chi tiêu cao bằng tọa độ, nh
 
 “Cả hai thuật toán chạy lại từ đầu trên cùng input mới. Mean phụ thuộc trực tiếp vào giá trị của các điểm nên có thể bị kéo bởi điểm xa. Medoid phải là observation trong input, nhưng không có nghĩa là miễn nhiễm với outliers; một synthetic observation cũng có thể được chọn làm medoid.”
 
-**Đối chiếu sau khi bật:** K-Means **11 iterations**, WCSS **74,982.60**; K-Medoids **4 iterations**, Total Dissimilarity **3,688.52**.
+**Đối chiếu sau khi bật:** K-Means **11 iterations**, WCSS **74,982.60**; PAM **6 accepted swaps**, **7 evaluation rounds**, **6,930 pairs tested** (990 cặp/vòng), Total Dissimilarity **3,079.34**. Medoid IDs: **25, 16, 81, 167, 176**. Best ΔE cuối **+0.222297**, không nhận. Trục tự mở rộng để thấy đầy đủ ba outliers.
 
 **Giải thích thận trọng:** Số điểm và khởi tạo đã thay đổi; không dùng riêng mức tăng objective để đo độ robust. Quan sát này không tách riêng tác động của initialization, assignment và update, cũng không chứng minh một phương pháp luôn tốt hơn.
 
@@ -167,8 +186,8 @@ Có thể mô tả khu vực thu nhập cao/chi tiêu cao bằng tọa độ, nh
 - **Tại sao K=5?** Là cấu hình minh họa cố định của demo. Elbow hiện tại chưa đủ để khẳng định 5 tối ưu; cần khảo sát thêm.
 - **Có chuẩn hóa chưa?** Chưa, web dùng raw features và ghi rõ trên toolbar. Scale khác nhau ảnh hưởng distance.
 - **Có accuracy không?** Không có ground-truth cluster labels nên không báo accuracy phân loại.
-- **Tại sao Update xong màu chưa đổi?** Web cố ý tách Update và Assignment để thấy rõ từng phase.
+- **Tại sao Update xong màu chưa đổi?** Điều này áp dụng cho K-Means. PAM Best Swap gán lại labels ngay để phản ánh đúng E mới; Swap Evaluation chỉ là giả định.
 - **Centroid có phải khách hàng thật?** Không bắt buộc. Medoid thì phải thuộc input; khi bật outliers, input gồm cả điểm giả lập.
 - **Tại sao chạy lại giống nhau?** Initialization deterministic, dữ liệu và thứ tự cố định.
 - **Có bảo đảm tối ưu toàn cục?** Không. Đây là kết quả hội tụ với khởi tạo hiện tại.
-- **Nếu một cụm rỗng?** Implementation giữ representative cũ. Engine có giới hạn 200 iterations; trạng thái Limit reached không được gọi là Converged.
+- **Nếu một cụm rỗng hoặc điểm trùng tọa độ?** K-Means giữ centroid cũ khi cụm rỗng. PAM vẫn đánh giá swap trên toàn input, không cần cập nhật riêng từng cụm. Các medoids được phân biệt bằng ID. PAM có giới hạn 200 accepted swaps; Limit reached không có nghĩa Converged.
