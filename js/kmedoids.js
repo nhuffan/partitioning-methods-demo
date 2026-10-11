@@ -1,4 +1,4 @@
-import {initialize,assign,distance,objective} from './utils.js';
+import {initialize,assign,distance,objective} from './utils.js?v=20261012-pam';
 export const initializeMedoids=initialize;
 export const assignToMedoids=assign;
 export const SWAP_EPSILON=1e-9;

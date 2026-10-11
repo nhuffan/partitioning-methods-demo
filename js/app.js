@@ -1,8 +1,8 @@
-import {customers,features} from './data.js';
-import {pointsFrom} from './utils.js';
-import {createState,nextStep,run} from './engine.js';
-import {scatter,elbow,representativeMoved} from './charts.js';
-import {compare} from './compare.js';
+import {customers,features} from './data.js?v=20261012-pam';
+import {pointsFrom} from './utils.js?v=20261012-pam';
+import {createState,nextStep,run} from './engine.js?v=20261012-pam';
+import {scatter,elbow,representativeMoved} from './charts.js?v=20261012-pam';
+import {compare} from './compare.js?v=20261012-pam';
 const $=id=>document.getElementById(id);
 // Bước 8: một global state giữ lựa chọn; engine giữ riêng trạng thái thuật toán.
 const appState={activeTab:'explore',featureX:'income',featureY:'spending',k:5,algorithm:'kmeans',lab:createState(),timer:null};

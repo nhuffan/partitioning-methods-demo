@@ -1,6 +1,6 @@
-import {kmeans} from './kmeans.js';
-import {kmedoids,evaluateSwaps,applySwap,SWAP_EPSILON} from './kmedoids.js';
-import {objective} from './utils.js';
+import {kmeans} from './kmeans.js?v=20261012-pam';
+import {kmedoids,evaluateSwaps,applySwap,SWAP_EPSILON} from './kmedoids.js?v=20261012-pam';
+import {objective} from './utils.js?v=20261012-pam';
 export const algorithms={kmeans,kmedoids};
 export const createState=()=>({phase:'original',iteration:0,reps:[],previous:[],labels:[],status:'Ready',objective:null,stable:false});
 // Bước 3–5: một lần gọi = đúng một phase. Update tuyệt đối không Assignment lại.

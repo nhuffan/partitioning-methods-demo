@@ -1,4 +1,4 @@
-import {initialize,assign,groups,distance} from './utils.js';
+import {initialize,assign,groups,distance} from './utils.js?v=20261012-pam';
 export const initializeCentroids = initialize;
 export const assignToCentroids = assign;
 // Bước 4: lấy mean từng coordinate. Cluster rỗng giữ representative cũ để tránh NaN.
