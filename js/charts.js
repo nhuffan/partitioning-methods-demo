@@ -34,6 +34,6 @@ export function elbow(el,values){
  let z=`<svg role="img" aria-label="Elbow chart K từ 1 đến 8" viewBox="0 0 ${W} ${H}">`;
  for(let j=0;j<=5;j++){const v=max*j/5;z+=`<line x1="${L}" x2="${W-R}" y1="${sy(v)}" y2="${sy(v)}" stroke="#e8ebf2"/>`+text(L-10,sy(v)+4,Math.round(v).toLocaleString('en-US'),'text-anchor="end"');}
  z+=`<polyline points="${values.map((v,i)=>`${sx(i)},${sy(v)}`).join(' ')}" fill="none" stroke="#5145cd" stroke-width="3"/>`;
- values.forEach((v,i)=>{z+=`<circle cx="${sx(i)}" cy="${sy(v)}" r="6" fill="#5145cd"><title>K=${i+1}; WCSS=${v.toFixed(2)}</title></circle>`+text(sx(i),H-B+24,i+1,'text-anchor="middle"');});
- el.innerHTML=z+text(W/2,H-9,'K','text-anchor="middle"')+text(L,16,'WCSS')+'</svg>';
+ values.forEach((v,i)=>{z+=`<circle cx="${sx(i)}" cy="${sy(v)}" r="6" fill="#5145cd"><title>K=${i+1}; SSE (WCSS)=${v.toFixed(2)}</title></circle>`+text(sx(i),H-B+24,i+1,'text-anchor="middle"');});
+ el.innerHTML=z+text(W/2,H-9,'K','text-anchor="middle"')+text(L,16,'SSE (WCSS)')+'</svg>';
 }
