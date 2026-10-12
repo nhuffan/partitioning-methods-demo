@@ -1,18 +1,3 @@
-## Lộ trình
-
-| Bước | Màn hình | Nội dung | Thời gian |
-|---|---|---|---|
-| 1 | Explore Data | Bài toán phân cụm | 1 phút |
-| 2 | Explore Data | Dataset, features, khoảng cách | 2 phút |
-| 3 | Find K | Elbow và lựa chọn K | 1–2 phút |
-| 4 | Clustering Lab | Original → Initialize | 1 phút |
-| 5 | Clustering Lab | Assignment | 1 phút |
-| 6 | Clustering Lab | Update → lặp → hội tụ K-Means | 2 phút |
-| 7 | Clustering Lab | Chạy K-Medoids | 2 phút |
-| 8 | Compare Methods | So sánh baseline | 1 phút |
-| 9 | Compare Methods | Thêm ba outliers | 1 phút |
-| 10 | Explore Data / Find K | Đổi features và kết luận | 1 phút |
-
 ## Bước 1 — Giới thiệu bài toán
 
 **Thao tác:** Mở tab **01 Explore Data**, trỏ vào scatter plot và các ô thống kê.
@@ -170,24 +155,3 @@ Có thể mô tả khu vực thu nhập cao/chi tiêu cao bằng tọa độ, nh
 **Giải thích thận trọng:** Số điểm và khởi tạo đã thay đổi; không dùng riêng mức tăng objective để đo độ robust. Quan sát này không tách riêng tác động của initialization, assignment và update, cũng không chứng minh một phương pháp luôn tốt hơn.
 
 **Thao tác kết thúc:** Tắt checkbox; xác nhận trở về **200 observations** và số liệu baseline. Explore Data và Clustering Lab luôn dùng 200 khách hàng gốc, checkbox chỉ ảnh hưởng Compare Methods.
-
-## Bước 10 — Đổi features và chốt bài
-
-**Thao tác:** Tắt outliers, đổi **X Feature = Age**, giữ **Y Feature = Spending Score**. Về Explore Data xem phân bố mới; sang Find K bấm **Calculate Elbow** nếu còn thời gian.
-
-**Nói:** “Cùng 200 khách hàng nhưng đổi features sẽ thay đổi hình học của dữ liệu, khoảng cách và kết quả phân cụm. Do đó lựa chọn feature và xử lý scale là một phần quan trọng trước khi chạy thuật toán.”
-
-**Quan sát:** Đổi features reset Lab và xóa Elbow cũ; Compare cập nhật. Nếu chọn hai trục trùng nhau, web tự hoán đổi trục còn lại. Không dùng số liệu mặc định phía trên để đối chiếu sau khi đổi features.
-
-**Lời kết:** “Qua demo, quy trình là hiểu dataset, khảo sát K, khởi tạo representative, gán điểm, cập nhật representative và lặp đến hội tụ. Khác biệt chính là K-Means dùng mean còn K-Medoids dùng observation đại diện. Kết quả phụ thuộc features, scale, K và khởi tạo; hội tụ chưa đồng nghĩa phân cụm tối ưu cho bài toán kinh doanh.”
-
-## Câu hỏi
-
-- **Tại sao K=5?** Là cấu hình minh họa cố định của demo. Elbow hiện tại chưa đủ để khẳng định 5 tối ưu; cần khảo sát thêm.
-- **Có chuẩn hóa chưa?** Chưa, web dùng raw features và ghi rõ trên toolbar. Scale khác nhau ảnh hưởng distance.
-- **Có accuracy không?** Không có ground-truth cluster labels nên không báo accuracy phân loại.
-- **Tại sao Update xong màu chưa đổi?** Điều này áp dụng cho K-Means. PAM Best Swap gán lại labels ngay để phản ánh đúng E mới; Swap Evaluation chỉ là giả định.
-- **Centroid có phải khách hàng thật?** Không bắt buộc. Medoid thì phải thuộc input; khi bật outliers, input gồm cả điểm giả lập.
-- **Tại sao chạy lại giống nhau?** Initialization deterministic, dữ liệu và thứ tự cố định.
-- **Có bảo đảm tối ưu toàn cục?** Không. Đây là kết quả hội tụ với khởi tạo hiện tại.
-- **Nếu một cụm rỗng hoặc điểm trùng tọa độ?** K-Means giữ centroid cũ khi cụm rỗng. PAM vẫn đánh giá swap trên toàn input, không cần cập nhật riêng từng cụm. Các medoids được phân biệt bằng ID. PAM có giới hạn 200 accepted swaps; Limit reached không có nghĩa Converged.
