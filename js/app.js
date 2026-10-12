@@ -18,13 +18,21 @@ function renderLab(){
  $('status').textContent=s.status;$('iteration').textContent=s.iteration;
  $('objectiveLabel').textContent=means?'SSE':'E (Total Distance)';$('objective').textContent=fmt(s.objective);
  $('representative').textContent=means?'Centroid':'Medoid';
- const explanations={original:'Dữ liệu chưa có cluster label. Nhấn Next Step để Initialize.',initialize:`Đã chọn ${appState.k} representatives bằng deterministic farthest-first. Chưa Assignment nên các customer vẫn cùng màu.`,assignment:'Assignment: gán mỗi observation vào representative gần nhất theo Euclidean distance. Representative giữ nguyên ở bước này.',update:means?'Update: tính mean của các observations trong từng cluster để di chuyển centroid. Giữ nguyên labels; lần Next Step tiếp theo mới Assignment lại.':'Update: chọn observation có tổng distance nhỏ nhất trong từng cluster làm medoid. Giữ nguyên labels ở phase này.',converged:'Converged: representatives đã ổn định sau Update. Dừng thuật toán; đây là nghiệm local, không bảo đảm global optimum.'};
- if(!means){
-  explanations['swap-evaluation']='Swap Evaluation: thử mọi cặp medoid–non-medoid trên toàn dataset. ΔE = E_mới − E_hiện tại sau khi gán lại vào medoid gần nhất. Chưa thay đổi medoids hay labels.';
-  explanations['best-swap']=s.stable?'Best Swap: không có ΔE < −1e−9; không nhận hoán đổi. Next Step xác nhận Converged.':'Best Swap: nhận đúng một cặp có ΔE nhỏ nhất (< −1e−9), thay medoid và gán lại labels để hiển thị đúng E_mới. Next Step trở về Assignment.';
-  explanations.converged='Converged: không còn hoán đổi một medoid với một non-medoid làm giảm E (sai số 1e−9). Đây là nghiệm tối ưu cục bộ theo một swap, không bảo đảm tối ưu toàn cục.';
- }
- $('explanation').textContent=explanations[s.phase]+(s.phase==='update'&&s.stable?' Representatives đã ổn định; Next Step sẽ xác nhận Converged.':'');
+ const explanations=means?{
+  original:'Dữ liệu gốc chưa được phân cụm, chưa có centroid và chưa được gán vào bất kỳ cụm nào.',
+  initialize:`Thuật toán chọn ra ${appState.k} centroid ban đầu. Mỗi centroid là 1 cụm, nó được khởi tạo bằng phương pháp Farthest-First, tức là lần lượt ưu tiên chọn những điểm nằm xa các centroid đã chọn trước đó.`,
+  assignment:`Tính khoảng cách từ mỗi khách hàng đến ${appState.k} centroid, sau đó gán khách hàng vào cụm có centroid gần nhất.`,
+  update:'Thuật toán tính lại vị trí của từng centroid bằng cách lấy trung bình tọa độ các khách hàng trong cụm.',
+  converged:'Quá trình này lặp đi lặp lại cho đến khi các centroid không còn thay đổi, tức là thuật toán đã hội tụ.'
+ }:{
+  original:'Dữ liệu chưa có cluster label. Nhấn Next Step để Initialize.',
+  initialize:'Khác với centroid, medoid luôn là một điểm dữ liệu thực tế, tức là một khách hàng trong bộ dữ liệu.',
+  assignment:'Mỗi khách hàng được gán vào medoid gần nhất theo khoảng cách Euclidean.',
+  'swap-evaluation':'PAM sẽ thử thay từng medoid bằng một điểm dữ liệu khác và tính lại tổng khoảng cách từ các khách hàng đến medoid gần nhất. Mục tiêu là tìm cách làm cho tổng khoảng cách này nhỏ nhất. Nếu Delta E âm, nghĩa là tổng khoảng cách sau khi hoán đổi đã giảm.',
+  'best-swap':'Sau khi thử các phép hoán đổi, thuật toán sẽ chọn phép đổi giúp tổng khoảng cách từ các khách hàng đến medoid gần nhất giảm nhiều nhất. Nếu có phép đổi giúp giảm tổng khoảng cách, PAM sẽ thực hiện phép đổi đó và tiếp tục kiểm tra các khả năng hoán đổi khác. Quá trình này lặp lại cho đến khi không còn phép hoán đổi nào giúp giảm tổng khoảng cách nữa. Khi đó, thuật toán hội tụ và dừng lại.',
+  converged:`PAM đã thực hiện ${s.iteration} lần hoán đổi medoid thành công qua ${s.evaluationRounds??0} lượt đánh giá và cuối cùng hội tụ. Lúc này, tổng khoảng cách từ ${customers.length} khách hàng đến các medoid gần nhất là ${s.objective===null?'—':s.objective.toLocaleString('vi-VN',{minimumFractionDigits:2,maximumFractionDigits:2})}. Đây cũng chính là giá trị mà PAM cố gắng giảm trong suốt quá trình phân cụm.`
+ };
+ $('explanation').textContent=explanations[s.phase];
  $('movementHint').hidden=!(means?s.phase==='update':s.phase==='best-swap')||!s.reps.some((r,i)=>representativeMoved(r,s.previous[i]));
  $('movementHint').textContent=means?'Mũi tên nét đứt cho thấy centroid di chuyển ở bước Update. ':'Mũi tên nét đứt cho thấy medoid cũ → medoid mới ở bước Best Swap. ';
  const phases=means?['original','initialize','assignment','update','converged']:['original','initialize','assignment','swap-evaluation','best-swap','converged'];
