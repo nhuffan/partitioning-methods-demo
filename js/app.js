@@ -82,7 +82,7 @@ for(const b of document.querySelectorAll('.tab'))b.addEventListener('click',()=>
 $('calculate').addEventListener('click',()=>{
  const values=Array.from({length:8},(_,i)=>run(points(),i+1,'kmeans').objective);
  $('elbowChart').classList.remove('empty');elbow($('elbowChart'),values);
- $('elbowValues').innerHTML='<table><thead><tr><th>K</th><th>SSE</th></tr></thead><tbody>'+values.map((v,i)=>`<tr><td>${i+1}</td><td>${fmt(v)}</td></tr>`).join('')+'</tbody></table>';
+ $('elbowValues').innerHTML='<table><thead><tr><th>K</th><th>SSE<small class="sse-description">Tổng bình phương khoảng cách từ mỗi điểm dữ liệu đến tâm cụm của nó</small></th></tr></thead><tbody>'+values.map((v,i)=>`<tr><td>${i+1}</td><td>${fmt(v)}</td></tr>`).join('')+'</tbody></table>';
 });
 $('outliers').addEventListener('change',renderComparison);
 $('sampleRows').innerHTML=customers.slice(0,5).map(r=>`<tr><td>${r.id}</td><td>${r.gender}</td><td>${r.age}</td><td>${r.income}</td><td>${r.spending}</td></tr>`).join('');
